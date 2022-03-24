@@ -1,186 +1,186 @@
 <?php
 
-/**
- * Интерфейс Абстрактной Фабрики объявляет набор методов, которые возвращают
- * различные абстрактные продукты. Эти продукты называются семейством и связаны
- * темой или концепцией высокого уровня. Продукты одного семейства обычно могут
- * взаимодействовать между собой. Семейство продуктов может иметь несколько
- * вариаций, но продукты одной вариации несовместимы с продуктами другой.
- */
 abstract class AbstractFactory
 {
-    abstract public function createTable() : Table;
+    abstract public function DBConnection() : Connection;
 
-    abstract public function createSofa() : Sofa;
+    abstract public function DBRecord() : Record;
 
-    public function combineTableSofa()
-    {
+    abstract public function DBQueryBuilder() : QueryBuilder;
 
-        $table = $this->createTable();
-        $sofa = $this->createSofa();
-        $sofa->anotherUsefulFunctionB($table);
-    }
 }
 
-/**
- * Конкретная Фабрика производит семейство продуктов одной вариации. Фабрика
- * гарантирует совместимость полученных продуктов. Обратите внимание, что
- * сигнатуры методов Конкретной Фабрики возвращают абстрактный продукт, в то
- * время как внутри метода создается экземпляр конкретного продукта.
- */
-class ArDekoFactory extends AbstractFactory
+class MySQLFactory extends AbstractFactory
 {
-    public function createTable() : Table
+    public function DBConnection() : Connection
     {
 
-        return new ArDekoTable();
+        return new MySQLConnection();
     }
 
-    public function createSofa() : Sofa
+    public function DBRecord() : Record
     {
 
-        return new ArDekoSofa();
+        return new MySQLRecord();
+    }
+
+    public function DBQueryBuilder() : QueryBuilder
+    {
+
+        return new MySQLQueryBuilder();
     }
 }
 
-/**
- * Каждая Конкретная Фабрика имеет соответствующую вариацию продукта.
- */
-class ModernFactory extends AbstractFactory
+class PostgreSQLFactory extends AbstractFactory
 {
-    public function createTable() : Table
+    public function DBConnection() : Connection
     {
 
-        return new ModernTable();
+        return new PostgreSQLConnection();
     }
 
-    public function createSofa() : Sofa
+    public function DBRecord() : Record
     {
 
-        return new ModernSofa();
+        return new PostgreSQLRecord();
+    }
+
+    public function DBQueryBuilder() : QueryBuilder
+    {
+
+        return new PostgreSQLQueryBuilder();
     }
 }
 
-/**
- * Каждый отдельный продукт семейства продуктов должен иметь базовый интерфейс.
- * Все вариации продукта должны реализовывать этот интерфейс.
- */
-interface Table
+class OracleFactory extends AbstractFactory
 {
-    public function usefulFunctionA() : string;
+    public function DBConnection() : Connection
+    {
+
+        return new OracleConnection();
+    }
+
+    public function DBRecord() : Record
+    {
+
+        return new OracleRecord();
+    }
+
+    public function DBQueryBuilder() : QueryBuilder
+    {
+
+        return new OracleQueryBuilder();
+    }
 }
 
-/**
- * Конкретные продукты создаются соответствующими Конкретными Фабриками.
- */
-class ArDekoTable implements Table
+interface Connection
 {
-    public function usefulFunctionA() : string
-    {
-
-        return "The result of the product A1.";
-    }
+    public function setConnection() : string;
 }
 
-class ModernTable implements Table
+class MySQLConnection implements Connection
 {
-    public function usefulFunctionA() : string
+    public function setConnection() : string
     {
-
-        return "The result of the product A2.";
+        return "MySQL DB connected";
     }
 }
 
-/**
- * Базовый интерфейс другого продукта. Все продукты могут взаимодействовать друг
- * с другом, но правильное взаимодействие возможно только между продуктами одной
- * и той же конкретной вариации.
- */
-interface Sofa
+class PostgreSQLConnection implements Connection
 {
-    /**
-     * Продукт B способен работать самостоятельно...
-     */
-    public function usefulFunctionB() : string;
-
-    /**
-     * ...а также взаимодействовать с Продуктами A той же вариации.
-     *
-     * Абстрактная Фабрика гарантирует, что все продукты, которые она создает,
-     * имеют одинаковую вариацию и, следовательно, совместимы.
-     */
-    public function anotherUsefulFunctionB(Table $collaborator) : string;
+    public function setConnection() : string
+    {
+        return "PostgreSQL DB connected";
+    }
 }
 
-/**
- * Конкретные Продукты создаются соответствующими Конкретными Фабриками.
- */
-class ArDekoSofa implements Sofa
+class OracleConnection implements Connection
 {
-    public function usefulFunctionB() : string
+    public function setConnection() : string
     {
-
-        return "The result of the product B1.";
-    }
-
-    /**
-     * Продукт B1 может корректно работать только с Продуктом A1. Тем не менее,
-     * он принимает любой экземпляр Абстрактного Продукта А в качестве
-     * аргумента.
-     */
-    public function anotherUsefulFunctionB(Table $collaborator) : string
-    {
-
-        $result = $collaborator->usefulFunctionA();
-
-        return "The result of the B1 collaborating with the ({$result})";
+        return "Oracle DB connected";
     }
 }
 
-class ModernSofa implements Sofa
+interface Record
 {
-    public function usefulFunctionB() : string
+    public function addRecord() : string;
+}
+
+class MySQLRecord implements Record
+{
+    public function addRecord() : string
     {
-
-        return "The result of the product B2.";
-    }
-
-    /**
-     * Продукт B2 может корректно работать только с Продуктом A2. Тем не менее,
-     * он принимает любой экземпляр Абстрактного Продукта А в качестве
-     * аргумента.
-     */
-    public function anotherUsefulFunctionB(Table $collaborator) : string
-    {
-
-        $result = $collaborator->usefulFunctionA();
-
-        return "The result of the B2 collaborating with the ({$result})";
+        return "Record added to MySQL DB";
     }
 }
 
-/**
- * Клиентский код работает с фабриками и продуктами только через абстрактные
- * типы: Абстрактная Фабрика и Абстрактный Продукт. Это позволяет передавать
- * любой подкласс фабрики или продукта клиентскому коду, не нарушая его.
- */
+class PostgreSQLRecord implements Record
+{
+    public function addRecord() : string
+    {
+        return "Record added to PostgreSQL DB";
+    }
+}
+
+class OracleRecord implements Record
+{
+    public function addRecord() : string
+    {
+        return "Record added to Oracle DB";
+    }
+}
+
+interface QueryBuilder
+{
+    public function query() : string;
+}
+
+class MySQLQueryBuilder implements QueryBuilder
+{
+    public function query() : string
+    {
+        return "MySQL DB query was executed successfully";
+    }
+}
+
+class PostgreSQLQueryBuilder implements QueryBuilder
+{
+    public function query() : string
+    {
+        return "PostgreSQL DB query was executed successfully";
+    }
+}
+
+class OracleQueryBuilder implements QueryBuilder
+{
+    public function query() : string
+    {
+        return "Oracle DB query was executed successfully";
+    }
+}
+
+
 function clientCode(AbstractFactory $factory)
 {
+    $connection = $factory -> DBConnection();
+    $record = $factory -> DBRecord();
+    $querybuilder = $factory ->DBQueryBuilder();
 
-    $productTable = $factory->createTable();
-    $productSofa = $factory->createSofa();
-
-    echo $productSofa->usefulFunctionB() . "\n";
-    echo $productSofa->anotherUsefulFunctionB($productTable) . "\n";
+    echo $connection -> setConnection() . "<br>";
+    echo $record -> addRecord() . "<br>";
+    echo $querybuilder -> query() . "<br>";
 }
 
-/**
- * Клиентский код может работать с любым конкретным классом фабрики.
- */
-echo "Client: Testing client code with the first factory type:\n";
-clientCode(new ArDekoFactory());
+echo "Try to work with MySQL DB:<br>";
+clientCode(new MySQLFactory());
+echo "<br>";
 
-echo "\n";
+echo "Try to work with PostgreSQL DB:<br>";
+clientCode(new PostgreSQLFactory());
+echo "<br>";
 
-echo "Client: Testing the same client code with the second factory type:\n";
-clientCode(new ModernFactory());
+echo "Try to work with Oracle DB:<br>";
+clientCode(new OracleFactory());
+echo "<br>";
+
